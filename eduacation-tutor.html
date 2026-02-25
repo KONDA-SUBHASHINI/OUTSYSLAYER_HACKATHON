@@ -1,1 +1,1713 @@
+<!DOCTYPE html>
+<html lang="en">
 
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SYNTHIA — AI Content Universe</title>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Inter:wght@300;400;500&display=swap"
+    rel="stylesheet">
+  <style>
+    :root {
+      --black: #050508;
+      --white: #f0ede8;
+      --acid: #c8ff00;
+      --cyan: #00ffe1;
+      --pink: #ff2d78;
+      --purple: #7b2fff;
+      --glass: rgba(255, 255, 255, 0.04);
+      --border: rgba(255, 255, 255, 0.08);
+    }
+
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background: var(--black);
+      color: var(--white);
+      font-family: 'Space Mono', monospace;
+      min-height: 100vh;
+      overflow-x: hidden;
+      cursor: none;
+    }
+
+    /* CUSTOM CURSOR */
+    .cursor {
+      position: fixed;
+      width: 12px;
+      height: 12px;
+      background: var(--acid);
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 9999;
+      transform: translate(-50%, -50%);
+      transition: transform 0.1s, width 0.2s, height 0.2s;
+      mix-blend-mode: difference;
+    }
+
+    .cursor-ring {
+      position: fixed;
+      width: 40px;
+      height: 40px;
+      border: 1px solid var(--acid);
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 9998;
+      transform: translate(-50%, -50%);
+      transition: transform 0.15s ease, width 0.3s, height 0.3s;
+      opacity: 0.5;
+    }
+
+    /* NOISE TEXTURE OVERLAY */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 1;
+      opacity: 0.4;
+    }
+
+    /* ANIMATED BG GRID */
+    .bg-grid {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      background-image:
+        linear-gradient(rgba(200, 255, 0, 0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(200, 255, 0, 0.03) 1px, transparent 1px);
+      background-size: 60px 60px;
+      animation: gridDrift 20s linear infinite;
+    }
+
+    @keyframes gridDrift {
+      0% {
+        transform: translateY(0);
+      }
+
+      100% {
+        transform: translateY(60px);
+      }
+    }
+
+    /* FLOATING ORBS */
+    .orb {
+      position: fixed;
+      border-radius: 50%;
+      filter: blur(80px);
+      pointer-events: none;
+      z-index: 0;
+      animation: orbFloat 8s ease-in-out infinite;
+    }
+
+    .orb1 {
+      width: 400px;
+      height: 400px;
+      background: rgba(123, 47, 255, 0.15);
+      top: -100px;
+      right: -100px;
+      animation-delay: 0s;
+    }
+
+    .orb2 {
+      width: 300px;
+      height: 300px;
+      background: rgba(255, 45, 120, 0.12);
+      bottom: 100px;
+      left: -100px;
+      animation-delay: 3s;
+    }
+
+    .orb3 {
+      width: 200px;
+      height: 200px;
+      background: rgba(0, 255, 225, 0.1);
+      top: 40%;
+      left: 40%;
+      animation-delay: 6s;
+    }
+
+    @keyframes orbFloat {
+
+      0%,
+      100% {
+        transform: translate(0, 0) scale(1);
+      }
+
+      50% {
+        transform: translate(30px, -30px) scale(1.1);
+      }
+    }
+
+    /* LAYOUT */
+    main {
+      position: relative;
+      z-index: 2;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 0 24px 80px;
+    }
+
+    /* HEADER */
+    header {
+      width: 100%;
+      max-width: 1100px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 32px 0 0;
+    }
+
+    .logo {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 2rem;
+      letter-spacing: 0.15em;
+      color: var(--acid);
+      text-shadow: 0 0 30px rgba(200, 255, 0, 0.4);
+    }
+
+    .logo span {
+      color: var(--white);
+    }
+
+    .status-pill {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--glass);
+      border: 1px solid var(--border);
+      padding: 6px 14px;
+      border-radius: 100px;
+      font-size: 0.7rem;
+      letter-spacing: 0.1em;
+      color: rgba(255, 255, 255, 0.5);
+    }
+
+    .status-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--acid);
+      box-shadow: 0 0 8px var(--acid);
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+
+      0%,
+      100% {
+        opacity: 1;
+      }
+
+      50% {
+        opacity: 0.3;
+      }
+    }
+
+    /* HERO TEXT */
+    .hero {
+      text-align: center;
+      padding: 60px 0 40px;
+      max-width: 900px;
+    }
+
+    .hero-tag {
+      display: inline-block;
+      font-size: 0.65rem;
+      letter-spacing: 0.2em;
+      color: var(--cyan);
+      text-transform: uppercase;
+      border: 1px solid rgba(0, 255, 225, 0.3);
+      padding: 6px 16px;
+      border-radius: 100px;
+      margin-bottom: 24px;
+      background: rgba(0, 255, 225, 0.05);
+    }
+
+    .hero h1 {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: clamp(3.5rem, 9vw, 8rem);
+      line-height: 0.9;
+      letter-spacing: 0.02em;
+      margin-bottom: 20px;
+    }
+
+    .hero h1 .line1 {
+      display: block;
+      color: var(--white);
+    }
+
+    .hero h1 .line2 {
+      display: block;
+      background: linear-gradient(135deg, var(--acid), var(--cyan));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .hero p {
+      font-family: 'Inter', sans-serif;
+      font-size: 1rem;
+      font-weight: 300;
+      color: rgba(255, 255, 255, 0.45);
+      max-width: 500px;
+      margin: 0 auto;
+      line-height: 1.7;
+    }
+
+    /* INPUT AREA */
+    .input-container {
+      width: 100%;
+      max-width: 860px;
+      margin-bottom: 32px;
+      position: relative;
+    }
+
+    .input-wrapper {
+      position: relative;
+      background: var(--glass);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 24px;
+      backdrop-filter: blur(20px);
+      transition: border-color 0.3s, box-shadow 0.3s;
+    }
+
+    .input-wrapper:focus-within {
+      border-color: rgba(200, 255, 0, 0.4);
+      box-shadow: 0 0 40px rgba(200, 255, 0, 0.08), inset 0 0 40px rgba(200, 255, 0, 0.02);
+    }
+
+    .input-label {
+      font-size: 0.65rem;
+      letter-spacing: 0.15em;
+      color: var(--acid);
+      text-transform: uppercase;
+      margin-bottom: 12px;
+      display: block;
+    }
+
+    textarea {
+      width: 100%;
+      min-height: 160px;
+      background: transparent;
+      border: none;
+      outline: none;
+      color: var(--white);
+      font-family: 'Space Mono', monospace;
+      font-size: 0.95rem;
+      line-height: 1.7;
+      resize: none;
+      caret-color: var(--acid);
+    }
+
+    textarea::placeholder {
+      color: rgba(255, 255, 255, 0.2);
+    }
+
+    .input-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: 16px;
+      padding-top: 16px;
+      border-top: 1px solid var(--border);
+    }
+
+    .char-count {
+      font-size: 0.7rem;
+      color: rgba(255, 255, 255, 0.3);
+    }
+
+    .enhance-btn {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: none;
+      border: 1px solid rgba(200, 255, 0, 0.3);
+      color: var(--acid);
+      padding: 6px 14px;
+      border-radius: 100px;
+      font-family: 'Space Mono', monospace;
+      font-size: 0.7rem;
+      cursor: none;
+      transition: all 0.2s;
+    }
+
+    .enhance-btn:hover {
+      background: rgba(200, 255, 0, 0.1);
+      border-color: var(--acid);
+    }
+
+    /* GENERATE OPTIONS GRID */
+    .section-label {
+      font-size: 0.65rem;
+      letter-spacing: 0.2em;
+      color: rgba(255, 255, 255, 0.35);
+      text-transform: uppercase;
+      margin-bottom: 20px;
+      text-align: center;
+    }
+
+    .options-grid {
+      width: 100%;
+      max-width: 860px;
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .option-card {
+      position: relative;
+      overflow: hidden;
+      background: var(--glass);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 20px 16px;
+      cursor: none;
+      transition: all 0.3s ease;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 10px;
+      group: true;
+    }
+
+    .option-card::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: var(--card-glow, transparent);
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+
+    .option-card:hover::before {
+      opacity: 1;
+    }
+
+    .option-card:hover {
+      border-color: var(--card-accent, rgba(255, 255, 255, 0.2));
+      transform: translateY(-4px);
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4), 0 0 0 1px var(--card-accent, transparent);
+    }
+
+    .option-card.active {
+      border-color: var(--card-accent);
+      background: rgba(255, 255, 255, 0.07);
+      transform: translateY(-4px);
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5), 0 0 30px rgba(200, 255, 0, 0.1);
+    }
+
+    /* Card variants */
+    .card-video {
+      --card-accent: #ff2d78;
+      --card-glow: linear-gradient(135deg, rgba(255, 45, 120, 0.08) 0%, transparent 70%);
+    }
+
+    .card-audio {
+      --card-accent: #7b2fff;
+      --card-glow: linear-gradient(135deg, rgba(123, 47, 255, 0.08) 0%, transparent 70%);
+    }
+
+    .card-image {
+      --card-accent: #00ffe1;
+      --card-glow: linear-gradient(135deg, rgba(0, 255, 225, 0.08) 0%, transparent 70%);
+    }
+
+    .card-mindmap {
+      --card-accent: #ff9500;
+      --card-glow: linear-gradient(135deg, rgba(255, 149, 0, 0.08) 0%, transparent 70%);
+    }
+
+    .card-short {
+      --card-accent: #c8ff00;
+      --card-glow: linear-gradient(135deg, rgba(200, 255, 0, 0.08) 0%, transparent 70%);
+    }
+
+    .card-long {
+      --card-accent: #ff6b6b;
+      --card-glow: linear-gradient(135deg, rgba(255, 107, 107, 0.08) 0%, transparent 70%);
+    }
+
+    .card-code {
+      --card-accent: #00d4ff;
+      --card-glow: linear-gradient(135deg, rgba(0, 212, 255, 0.08) 0%, transparent 70%);
+    }
+
+    .card-ppt {
+      --card-accent: #ff9500;
+      --card-glow: linear-gradient(135deg, rgba(255, 149, 0, 0.1) 0%, transparent 70%);
+    }
+
+    .card-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.3rem;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--card-accent, rgba(255, 255, 255, 0.1));
+    }
+
+    .card-title {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 1.1rem;
+      letter-spacing: 0.05em;
+      color: var(--white);
+    }
+
+    .card-desc {
+      font-family: 'Inter', sans-serif;
+      font-size: 0.7rem;
+      color: rgba(255, 255, 255, 0.4);
+      line-height: 1.5;
+      font-weight: 300;
+    }
+
+    .card-badge {
+      font-size: 0.55rem;
+      letter-spacing: 0.1em;
+      padding: 3px 8px;
+      border-radius: 100px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--card-accent);
+      color: var(--card-accent);
+      margin-top: auto;
+      text-transform: uppercase;
+    }
+
+    /* GENERATE BUTTON */
+    .generate-area {
+      width: 100%;
+      max-width: 860px;
+      margin-top: 24px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .generate-btn {
+      flex: 1;
+      position: relative;
+      overflow: hidden;
+      background: linear-gradient(135deg, var(--acid), #80ff00);
+      border: none;
+      border-radius: 14px;
+      padding: 18px 32px;
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 1.3rem;
+      letter-spacing: 0.1em;
+      color: var(--black);
+      cursor: none;
+      transition: all 0.3s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      box-shadow: 0 8px 32px rgba(200, 255, 0, 0.25);
+    }
+
+    .generate-btn::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.2), transparent);
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+
+    .generate-btn:hover::before {
+      opacity: 1;
+    }
+
+    .generate-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 16px 48px rgba(200, 255, 0, 0.35);
+    }
+
+    .generate-btn:active {
+      transform: translateY(0);
+    }
+
+    .generate-btn.loading {
+      background: rgba(200, 255, 0, 0.2);
+      color: var(--acid);
+      cursor: not-allowed;
+      box-shadow: 0 0 40px rgba(200, 255, 0, 0.1);
+    }
+
+    .random-btn {
+      padding: 18px 20px;
+      border-radius: 14px;
+      background: var(--glass);
+      border: 1px solid var(--border);
+      color: var(--white);
+      cursor: none;
+      font-size: 1.2rem;
+      transition: all 0.3s;
+    }
+
+    .random-btn:hover {
+      border-color: rgba(255, 255, 255, 0.3);
+      background: rgba(255, 255, 255, 0.07);
+    }
+
+    /* OUTPUT AREA */
+    .output-section {
+      width: 100%;
+      max-width: 860px;
+      margin-top: 40px;
+    }
+
+    .output-card {
+      background: var(--glass);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      overflow: hidden;
+      display: none;
+      animation: fadeUp 0.5s ease;
+    }
+
+    .output-card.visible {
+      display: block;
+    }
+
+    @keyframes fadeUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .output-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .output-title {
+      font-size: 0.7rem;
+      letter-spacing: 0.15em;
+      color: var(--acid);
+      text-transform: uppercase;
+    }
+
+    .output-actions {
+      display: flex;
+      gap: 8px;
+    }
+
+    .out-btn {
+      padding: 6px 14px;
+      border-radius: 100px;
+      background: var(--glass);
+      border: 1px solid var(--border);
+      color: rgba(255, 255, 255, 0.6);
+      font-family: 'Space Mono', monospace;
+      font-size: 0.65rem;
+      cursor: none;
+      transition: all 0.2s;
+    }
+
+    .out-btn:hover {
+      border-color: rgba(255, 255, 255, 0.3);
+      color: var(--white);
+    }
+
+    .output-body {
+      padding: 24px;
+    }
+
+    /* LOADING ANIMATION */
+    .loader-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 60px;
+      gap: 20px;
+      display: none;
+    }
+
+    .loader-container.visible {
+      display: flex;
+    }
+
+    .loader-text {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 1.5rem;
+      letter-spacing: 0.1em;
+      color: var(--acid);
+      animation: blink 1.5s infinite;
+    }
+
+    @keyframes blink {
+
+      0%,
+      100% {
+        opacity: 1;
+      }
+
+      50% {
+        opacity: 0.3;
+      }
+    }
+
+    .loader-bar {
+      width: 200px;
+      height: 2px;
+      background: rgba(200, 255, 0, 0.1);
+      border-radius: 100px;
+      overflow: hidden;
+    }
+
+    .loader-bar-inner {
+      height: 100%;
+      width: 0%;
+      background: var(--acid);
+      border-radius: 100px;
+      animation: loadBar 2.5s ease-in-out infinite;
+    }
+
+    @keyframes loadBar {
+      0% {
+        width: 0%;
+      }
+
+      50% {
+        width: 80%;
+      }
+
+      100% {
+        width: 100%;
+      }
+    }
+
+    .loader-steps {
+      font-size: 0.7rem;
+      color: rgba(255, 255, 255, 0.35);
+      animation: stepCycle 3s infinite;
+    }
+
+    @keyframes stepCycle {
+
+      0%,
+      30% {
+        content: '';
+      }
+    }
+
+    /* RESULT DISPLAYS */
+    .result-text {
+      font-family: 'Inter', sans-serif;
+      font-size: 0.95rem;
+      line-height: 1.8;
+      color: rgba(255, 255, 255, 0.8);
+      white-space: pre-wrap;
+    }
+
+    .result-image {
+      width: 100%;
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.05);
+      min-height: 300px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid var(--border);
+      overflow: hidden;
+    }
+
+    .result-image img {
+      width: 100%;
+      height: auto;
+      border-radius: 12px;
+    }
+
+    .result-image .placeholder-text {
+      color: rgba(255, 255, 255, 0.3);
+      font-size: 0.8rem;
+      text-align: center;
+      padding: 40px;
+    }
+
+    .result-video {
+      width: 100%;
+      border-radius: 12px;
+      overflow: hidden;
+      background: #000;
+      min-height: 300px;
+    }
+
+    .result-video video {
+      width: 100%;
+    }
+
+    .result-audio audio {
+      width: 100%;
+      margin-top: 8px;
+    }
+
+    .waveform-placeholder {
+      background: linear-gradient(90deg, rgba(123, 47, 255, 0.2), rgba(0, 255, 225, 0.2));
+      border-radius: 8px;
+      height: 80px;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+
+    .wave-bars {
+      display: flex;
+      align-items: center;
+      gap: 3px;
+      height: 60px;
+    }
+
+    .wave-bar {
+      width: 4px;
+      background: var(--purple);
+      border-radius: 2px;
+      animation: waveAnim 0.8s infinite;
+    }
+
+    .wave-bar:nth-child(odd) {
+      background: var(--cyan);
+    }
+
+    @keyframes waveAnim {
+
+      0%,
+      100% {
+        height: 10px;
+      }
+
+      50% {
+        height: var(--h, 40px);
+      }
+    }
+
+    /* MIND MAP */
+    .mindmap-svg-container {
+      width: 100%;
+      overflow: auto;
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    /* FOOTER */
+    footer {
+      position: relative;
+      z-index: 2;
+      text-align: center;
+      padding: 40px 24px 24px;
+      font-size: 0.65rem;
+      color: rgba(255, 255, 255, 0.2);
+      letter-spacing: 0.1em;
+    }
+
+    /* TOAST */
+    .toast {
+      position: fixed;
+      bottom: 32px;
+      right: 32px;
+      z-index: 9999;
+      background: rgba(10, 10, 15, 0.95);
+      border: 1px solid var(--acid);
+      color: var(--acid);
+      padding: 12px 20px;
+      border-radius: 12px;
+      font-size: 0.75rem;
+      letter-spacing: 0.05em;
+      transform: translateY(100px);
+      opacity: 0;
+      transition: all 0.4s ease;
+      backdrop-filter: blur(20px);
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+    }
+
+    .toast.show {
+      transform: translateY(0);
+      opacity: 1;
+    }
+
+    /* RESPONSIVE */
+    @media (max-width: 768px) {
+      .options-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .generate-area {
+        flex-direction: column;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .options-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .hero h1 {
+        font-size: 3rem;
+      }
+    }
+
+    /* HISTORY PANEL */
+    .history-btn {
+      position: fixed;
+      right: 24px;
+      top: 50%;
+      transform: translateY(-50%);
+      writing-mode: vertical-rl;
+      text-orientation: mixed;
+      background: var(--glass);
+      border: 1px solid var(--border);
+      color: rgba(255, 255, 255, 0.4);
+      padding: 16px 10px;
+      border-radius: 100px;
+      cursor: none;
+      font-size: 0.65rem;
+      letter-spacing: 0.1em;
+      z-index: 10;
+      transition: all 0.3s;
+    }
+
+    .history-btn:hover {
+      border-color: rgba(255, 255, 255, 0.3);
+      color: var(--white);
+    }
+
+    /* SHIMMER on cards */
+    .option-card .shimmer {
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.03), transparent);
+      animation: shimmer 3s infinite;
+    }
+
+    @keyframes shimmer {
+      0% {
+        left: -100%;
+      }
+
+      100% {
+        left: 100%;
+      }
+    }
+
+    /* All-output controls */
+    .output-meta {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 16px;
+      flex-wrap: wrap;
+    }
+
+    .meta-tag {
+      font-size: 0.6rem;
+      letter-spacing: 0.1em;
+      padding: 4px 10px;
+      border-radius: 100px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--border);
+      color: rgba(255, 255, 255, 0.4);
+    }
+
+    /* Mode indicator strip */
+    .mode-strip {
+      width: 100%;
+      max-width: 860px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 12px;
+      padding: 10px 16px;
+      background: var(--glass);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      display: none;
+    }
+
+    .mode-strip.visible {
+      display: flex;
+    }
+
+    .mode-indicator {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--acid);
+      animation: pulse 2s infinite;
+    }
+
+    .mode-label {
+      font-size: 0.7rem;
+      color: rgba(255, 255, 255, 0.6);
+    }
+
+    .mode-name {
+      font-size: 0.7rem;
+      color: var(--acid);
+      font-weight: 700;
+    }
+
+    button {
+      cursor: none !important;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="cursor" id="cursor"></div>
+  <div class="cursor-ring" id="cursorRing"></div>
+  <div class="bg-grid"></div>
+  <div class="orb orb1"></div>
+  <div class="orb orb2"></div>
+  <div class="orb orb3"></div>
+  <div class="toast" id="toast"></div>
+
+  <button class="history-btn" onclick="toggleHistory()">HISTORY</button>
+
+  <main>
+    <header>
+      <div class="logo">SYNTH<span>IA</span></div>
+      <div class="status-pill">
+        <div class="status-dot"></div>
+        MODELS ONLINE
+      </div>
+    </header>
+
+    <div class="hero">
+      <div class="hero-tag">✦ Multimodal AI Generation Platform</div>
+      <h1>
+        <span class="line1">ONE PROMPT.</span>
+        <span class="line2">INFINITE CONTENT.</span>
+      </h1>
+      <p>Transform your ideas into videos, audio, images, mind maps, code, and presentations — powered by HuggingFace
+        models via n8n workflows.</p>
+    </div>
+
+    <!-- INPUT -->
+    <div class="input-container">
+      <div class="input-wrapper">
+        <label class="input-label">✦ YOUR IDEA / PROMPT</label>
+        <textarea id="mainPrompt"
+          placeholder="Describe what you want to create... e.g. 'A futuristic city on Mars at sunset with flying cars and neon signs'"
+          oninput="updateCharCount()" onkeydown="handleKeydown(event)"></textarea>
+        <div class="input-footer">
+          <span class="char-count"><span id="charCount">0</span> / 2000</span>
+          <button class="enhance-btn" onclick="enhancePrompt()">
+            ✦ AI Enhance
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- MODE STRIP -->
+    <div class="mode-strip" id="modeStrip">
+      <div class="mode-indicator"></div>
+      <span class="mode-label">Selected mode:</span>
+      <span class="mode-name" id="modeName">—</span>
+      <span class="mode-label" style="margin-left: auto; font-size: 0.6rem;">Press SPACE + Enter to generate</span>
+    </div>
+
+    <!-- OPTIONS GRID -->
+    <div class="section-label">CHOOSE OUTPUT FORMAT</div>
+    <div class="options-grid" id="optionsGrid">
+
+      <div class="option-card card-video" data-mode="video" onclick="selectMode(this)">
+        <div class="shimmer"></div>
+        <div class="card-icon">🎬</div>
+        <div class="card-title">VIDEO</div>
+        <div class="card-desc">AI-generated video clips from text using ModelScope</div>
+        <div class="card-badge">damo-vilab/text-to-video</div>
+      </div>
+
+      <div class="option-card card-audio" data-mode="audio" onclick="selectMode(this)">
+        <div class="shimmer"></div>
+        <div class="card-icon">🎵</div>
+        <div class="card-title">AUDIO</div>
+        <div class="card-desc">Music & speech synthesis with Bark or MusicGen</div>
+        <div class="card-badge">facebook/musicgen-small</div>
+      </div>
+
+      <div class="option-card card-image" data-mode="image" onclick="selectMode(this)">
+        <div class="shimmer"></div>
+        <div class="card-icon">🖼️</div>
+        <div class="card-title">IMAGE</div>
+        <div class="card-desc">Photorealistic images via Stable Diffusion XL</div>
+        <div class="card-badge">SDXL-turbo</div>
+      </div>
+
+      <div class="option-card card-mindmap" data-mode="mindmap" onclick="selectMode(this)">
+        <div class="shimmer"></div>
+        <div class="card-icon">🧠</div>
+        <div class="card-title">MIND MAP</div>
+        <div class="card-desc">Interactive visual knowledge graphs from concepts</div>
+        <div class="card-badge">AI-structured</div>
+      </div>
+
+      <div class="option-card card-short" data-mode="short" onclick="selectMode(this)">
+        <div class="shimmer"></div>
+        <div class="card-icon">⚡</div>
+        <div class="card-title">SHORT TEXT</div>
+        <div class="card-desc">Tweets, captions, taglines, one-liners — instant</div>
+        <div class="card-badge">Mistral-7B</div>
+      </div>
+
+      <div class="option-card card-long" data-mode="long" onclick="selectMode(this)">
+        <div class="shimmer"></div>
+        <div class="card-icon">📄</div>
+        <div class="card-title">LONG TEXT</div>
+        <div class="card-desc">Articles, stories, essays, reports in seconds</div>
+        <div class="card-badge">Llama-3-8B</div>
+      </div>
+
+      <div class="option-card card-code" data-mode="code" onclick="selectMode(this)">
+        <div class="shimmer"></div>
+        <div class="card-icon">💻</div>
+        <div class="card-title">CODE</div>
+        <div class="card-desc">Full code generation with explanations & snippets</div>
+        <div class="card-badge">CodeLlama-34B</div>
+      </div>
+
+      <div class="option-card card-ppt" data-mode="presentation" onclick="selectMode(this)">
+        <div class="shimmer"></div>
+        <div class="card-icon">📊</div>
+        <div class="card-title">PRESENTATION</div>
+        <div class="card-desc">Slide-ready structured content with talking points</div>
+        <div class="card-badge">Mixtral-8x7B</div>
+      </div>
+
+    </div>
+
+    <!-- GENERATE -->
+    <div class="generate-area">
+      <button class="generate-btn" id="generateBtn" onclick="generate()">
+        <span id="btnIcon">✦</span>
+        <span id="btnText">SELECT A FORMAT TO GENERATE</span>
+      </button>
+      <button class="random-btn" onclick="randomPrompt()" title="Random Prompt">🎲</button>
+    </div>
+
+    <!-- LOADER -->
+    <div class="output-section">
+      <div class="loader-container" id="loader">
+        <div class="loader-text" id="loaderText">INITIALIZING</div>
+        <div class="loader-bar">
+          <div class="loader-bar-inner"></div>
+        </div>
+        <div class="loader-steps" id="loaderStep">Connecting to n8n workflow...</div>
+      </div>
+
+      <!-- OUTPUT CARD -->
+      <div class="output-card" id="outputCard">
+        <div class="output-header">
+          <div class="output-title" id="outputTitle">OUTPUT</div>
+          <div class="output-actions">
+            <button class="out-btn" onclick="copyOutput()">COPY</button>
+            <button class="out-btn" onclick="downloadOutput()">DOWNLOAD</button>
+            <button class="out-btn" onclick="shareOutput()">SHARE</button>
+            <button class="out-btn" onclick="clearOutput()">✕</button>
+          </div>
+        </div>
+        <div class="output-body" id="outputBody"></div>
+      </div>
+    </div>
+
+  </main>
+
+  <footer>
+    SYNTHIA — Multimodal AI Platform ✦ Powered by HuggingFace + n8n ✦ Built for Hackathon 2025
+  </footer>
+
+  <script>
+    // ═══════════════════════════════════════════════════════════
+    //  CURSOR
+    // ═══════════════════════════════════════════════════════════
+    const cursor = document.getElementById('cursor');
+    const ring = document.getElementById('cursorRing');
+    let mx = 0, my = 0, rx = 0, ry = 0;
+
+    document.addEventListener('mousemove', e => {
+      mx = e.clientX; my = e.clientY;
+      cursor.style.left = mx + 'px'; cursor.style.top = my + 'px';
+    });
+
+    function animRing() {
+      rx += (mx - rx) * 0.12; ry += (my - ry) * .12;
+      ring.style.left = rx + 'px'; ring.style.top = ry + 'px';
+      requestAnimationFrame(animRing);
+    }
+    animRing();
+
+    document.querySelectorAll('button, .option-card, textarea').forEach(el => {
+      el.addEventListener('mouseenter', () => {
+        cursor.style.width = '20px'; cursor.style.height = '20px';
+        ring.style.width = '60px'; ring.style.height = '60px';
+      });
+      el.addEventListener('mouseleave', () => {
+        cursor.style.width = '12px'; cursor.style.height = '12px';
+        ring.style.width = '40px'; ring.style.height = '40px';
+      });
+    });
+
+    // ═══════════════════════════════════════════════════════════
+    //  STATE
+    // ═══════════════════════════════════════════════════════════
+    let selectedMode = null;
+    let currentOutput = null;
+    let history = JSON.parse(localStorage.getItem('synthia_history') || '[]');
+
+    // ═══════════════════════════════════════════════════════════
+    //  N8N CONFIG — Update this with your actual endpoint
+    // ═══════════════════════════════════════════════════════════
+    // const N8N_BASE_URL = 'http://localhost:5678/webhook';
+    const N8N_BASE_URL = 'https://education-tutor.app.n8n.cloud/webhook'; const WEBHOOK_URLS = {
+      video: `${N8N_BASE_URL}/synthia-video`,
+      audio: `${N8N_BASE_URL}/synthia-audio`,
+      image: `${N8N_BASE_URL}/synthia-image`,
+      mindmap: `${N8N_BASE_URL}/synthia-mindmap`,
+      short: `${N8N_BASE_URL}/synthia-short`,
+      long: `${N8N_BASE_URL}/synthia-long`,
+      code: `${N8N_BASE_URL}/synthia-code`,
+      presentation: `${N8N_BASE_URL}/synthia-presentation`,
+    };
+
+    const LOADER_STEPS = {
+      video: ['🔗 Connecting to n8n...', '🤖 Loading ModelScope...', '🎬 Generating video frames...', '✨ Compositing output...'],
+      audio: ['🔗 Connecting to n8n...', '🎵 Initializing MusicGen...', '🎶 Synthesizing audio...', '✨ Mixing output...'],
+      image: ['🔗 Connecting to n8n...', '🖼️ Loading Stable Diffusion XL...', '✏️ Rendering pixels...', '✨ Finalizing image...'],
+      mindmap: ['🔗 Connecting to n8n...', '🧠 Analyzing concepts...', '🌐 Building node graph...', '✨ Rendering map...'],
+      short: ['🔗 Connecting to n8n...', '⚡ Calling Mistral-7B...', '✨ Optimizing output...'],
+      long: ['🔗 Connecting to n8n...', '📄 Calling Llama-3-8B...', '✍️ Writing content...', '✨ Formatting text...'],
+      code: ['🔗 Connecting to n8n...', '💻 Loading CodeLlama...', '⚙️ Generating code...', '✨ Formatting output...'],
+      presentation: ['🔗 Connecting to n8n...', '📊 Calling Mixtral...', '🗂️ Structuring slides...', '✨ Finalizing deck...'],
+    };
+
+    // ═══════════════════════════════════════════════════════════
+    //  SELECT MODE
+    // ═══════════════════════════════════════════════════════════
+    function selectMode(card) {
+      document.querySelectorAll('.option-card').forEach(c => c.classList.remove('active'));
+      card.classList.add('active');
+      selectedMode = card.dataset.mode;
+
+      document.getElementById('modeName').textContent = card.querySelector('.card-title').textContent;
+      document.getElementById('modeStrip').classList.add('visible');
+
+      const btn = document.getElementById('generateBtn');
+      const icon = document.getElementById('btnIcon');
+      const txt = document.getElementById('btnText');
+      btn.className = 'generate-btn';
+      icon.textContent = '✦';
+      txt.textContent = `GENERATE ${card.querySelector('.card-title').textContent}`;
+    }
+
+    // ═══════════════════════════════════════════════════════════
+    //  GENERATE
+    // ═══════════════════════════════════════════════════════════
+    async function generate() {
+      const prompt = document.getElementById('mainPrompt').value.trim();
+      if (!selectedMode) { toast('Please select an output format first'); return; }
+      if (!prompt) { toast('Please enter a prompt'); return; }
+
+      const btn = document.getElementById('generateBtn');
+      btn.classList.add('loading');
+      document.getElementById('btnText').textContent = 'GENERATING...';
+      document.getElementById('btnIcon').textContent = '⏳';
+
+      showLoader(selectedMode);
+      hideOutput();
+
+      try {
+        const result = await callN8NWorkflow(selectedMode, prompt);
+        renderOutput(selectedMode, result, prompt);
+        saveToHistory(selectedMode, prompt, result);
+      } catch (err) {
+        console.error(err);
+        // Fallback demo output
+        const demoResult = generateDemoOutput(selectedMode, prompt);
+        renderOutput(selectedMode, demoResult, prompt);
+        toast('⚠️ Using demo mode — connect n8n for live generation');
+      }
+
+      hideLoader();
+      btn.classList.remove('loading');
+      document.getElementById('btnText').textContent = `GENERATE ${selectedMode.toUpperCase()}`;
+      document.getElementById('btnIcon').textContent = '✦';
+    }
+
+    async function callN8NWorkflow(mode, prompt) {
+      const url = `${WEBHOOK_URLS[mode]}?prompt=${encodeURIComponent(prompt)}`;
+
+      if (mode === "image") {
+        // Direct image URL return chestam
+        return { imageUrl: url };
+      }
+
+      const response = await fetch(url);
+      return await response.json();
+    }
+
+    // ═══════════════════════════════════════════════════════════
+    //  DEMO OUTPUT (when n8n not connected)
+    // ═══════════════════════════════════════════════════════════
+    function generateDemoOutput(mode, prompt) {
+      const demos = {
+        short: { text: `✦ "${prompt.substring(0, 40)}..." — This is the future. One prompt. Infinite possibilities. #AI #Innovation` },
+        long: { text: `# ${prompt}\n\nIn the rapidly evolving landscape of artificial intelligence, the concept of multimodal generation has emerged as a transformative paradigm. What once required entire teams of specialists—writers, designers, musicians, video producers—can now be initiated with a single, well-crafted prompt.\n\nThe technology underlying this revolution combines large language models with specialized generative architectures. Transformers process semantic meaning, diffusion models render visual content, and autoregressive models synthesize audio—all orchestrated through intelligent workflow engines like n8n.\n\nThe implications extend far beyond convenience. We're witnessing a fundamental shift in creative production, one where human imagination serves as the primary input and artificial intelligence serves as the execution layer. The barrier between concept and creation has never been thinner.\n\nFor businesses, this means prototyping at the speed of thought. For creators, it means unlimited creative exploration. For educators, it means personalized content at scale. The democratization of creation is not merely a promise—it is an ongoing reality.` },
+        code: { code: `// Generated by SYNTHIA — ${prompt}\n// Model: CodeLlama-34B via HuggingFace\n\nimport { useState, useEffect } from 'react';\n\n/**\n * SYNTHIA AI Content Generator Component\n * Auto-generated from prompt: "${prompt}"\n */\nexport function ContentGenerator({ apiEndpoint }) {\n  const [prompt, setPrompt] = useState('');\n  const [output, setOutput] = useState(null);\n  const [loading, setLoading] = useState(false);\n\n  const generate = async () => {\n    setLoading(true);\n    try {\n      const res = await fetch(apiEndpoint, {\n        method: 'POST',\n        headers: { 'Content-Type': 'application/json' },\n        body: JSON.stringify({ prompt })\n      });\n      const data = await res.json();\n      setOutput(data.result);\n    } catch (err) {\n      console.error('Generation failed:', err);\n    } finally {\n      setLoading(false);\n    }\n  };\n\n  return (\n    <div className="generator">\n      <textarea value={prompt} onChange={e => setPrompt(e.target.value)} />\n      <button onClick={generate} disabled={loading}>\n        {loading ? 'Generating...' : 'Generate'}\n      </button>\n      {output && <div className="output">{output}</div>}\n    </div>\n  );\n}`, language: 'jsx' },
+        mindmap: { nodes: buildDemoMindmap(prompt) },
+        image: { imageUrl: null, prompt },
+        video: { videoUrl: null, prompt },
+        audio: { audioUrl: null, prompt },
+        presentation: {
+          slides: [
+            { title: prompt.substring(0, 50), content: 'Opening Hook: The future belongs to those who adapt', type: 'title' },
+            { title: 'The Problem', content: '• 87% of teams waste hours on content creation\n• Inconsistent output quality\n• High cost of specialized talent\n• Slow iteration cycles', type: 'content' },
+            { title: 'Our Solution', content: `SYNTHIA: Multimodal AI Generation\n• Video, Audio, Image in one platform\n• 8+ output formats\n• n8n workflow automation\n• HuggingFace model integration`, type: 'content' },
+            { title: 'How It Works', content: '1. Enter your prompt\n2. Select output format\n3. AI generates via n8n\n4. Download & deploy', type: 'content' },
+            { title: 'Impact & ROI', content: '90% faster content creation\n70% cost reduction\n10x team productivity\n∞ creative possibilities', type: 'stats' },
+            { title: 'Call to Action', content: 'Start generating. Start winning.', type: 'cta' }
+          ]
+        }
+      };
+      return demos[mode] || { text: `Generated output for: ${prompt}` };
+    }
+
+    function buildDemoMindmap(prompt) {
+      const words = prompt.split(' ').slice(0, 5);
+      return {
+        center: prompt.substring(0, 30) + (prompt.length > 30 ? '...' : ''),
+        branches: [
+          { label: '🎯 Core Concept', children: [words[0] || 'Idea', words[1] || 'Vision'] },
+          { label: '🔧 Components', children: ['Process', 'System', 'Flow'] },
+          { label: '💡 Applications', children: ['Use Case 1', 'Use Case 2', 'Use Case 3'] },
+          { label: '📊 Outcomes', children: ['Impact', 'Results', 'Metrics'] },
+          { label: '🚀 Next Steps', children: ['Research', 'Prototype', 'Launch'] }
+        ]
+      };
+    }
+
+    // ═══════════════════════════════════════════════════════════
+    //  RENDER OUTPUT
+    // ═══════════════════════════════════════════════════════════
+    function renderOutput(mode, data, prompt) {
+      const body = document.getElementById('outputBody');
+      const title = document.getElementById('outputTitle');
+      const card = document.getElementById('outputCard');
+
+      title.textContent = `✦ ${mode.toUpperCase()} OUTPUT`;
+      currentOutput = { mode, data, prompt };
+
+      const renderers = {
+        short: () => renderText(data.text || data.result || JSON.stringify(data), 'short'),
+        long: () => renderText(data.text || data.result || JSON.stringify(data), 'long'),
+        code: () => renderCode(data.code || data.result || JSON.stringify(data), data.language || 'javascript'),
+        image: () => renderImage(data.imageUrl || data.url || data.image),
+        video: () => renderVideo(data.videoUrl || data.url || data.video),
+        audio: () => renderAudio(data.audioUrl || data.url || data.audio),
+        mindmap: () => renderMindmap(data.nodes || data),
+        presentation: () => renderPresentation(data.slides || []),
+      };
+
+      body.innerHTML = '';
+      (renderers[mode] || (() => renderText(JSON.stringify(data, null, 2))))();
+
+      // Add meta tags
+      const meta = document.createElement('div');
+      meta.className = 'output-meta';
+      meta.innerHTML = `
+    <span class="meta-tag">MODE: ${mode.toUpperCase()}</span>
+    <span class="meta-tag">MODEL: ${getModelName(mode)}</span>
+    <span class="meta-tag">${new Date().toLocaleTimeString()}</span>
+  `;
+      body.appendChild(meta);
+
+      card.classList.add('visible');
+      card.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+
+    function renderText(text, type) {
+      const body = document.getElementById('outputBody');
+      const div = document.createElement('div');
+      div.className = 'result-text';
+      // Convert markdown-like headers
+      div.innerHTML = text
+        .replace(/^# (.+)/gm, '<h2 style="font-family:\'Bebas Neue\',sans-serif;font-size:1.8rem;color:var(--acid);margin:20px 0 12px;letter-spacing:0.05em">$1</h2>')
+        .replace(/^## (.+)/gm, '<h3 style="font-family:\'Bebas Neue\',sans-serif;font-size:1.3rem;color:var(--cyan);margin:16px 0 8px">$1</h3>')
+        .replace(/\*\*(.+?)\*\*/g, '<strong style="color:var(--white)">$1</strong>')
+        .replace(/\n/g, '<br>');
+      body.appendChild(div);
+    }
+
+    function renderCode(code, lang) {
+      const body = document.getElementById('outputBody');
+      const wrapper = document.createElement('div');
+      wrapper.style.cssText = 'background:rgba(0,0,0,0.5);border-radius:12px;overflow:hidden;border:1px solid rgba(255,255,255,0.08)';
+      wrapper.innerHTML = `
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 16px;border-bottom:1px solid rgba(255,255,255,0.08)">
+      <span style="font-size:0.65rem;color:var(--cyan);letter-spacing:0.1em">${lang.toUpperCase()}</span>
+      <button class="out-btn" onclick="navigator.clipboard.writeText(this.closest('div').nextSibling.textContent)">COPY CODE</button>
+    </div>
+    <pre style="padding:20px;overflow-x:auto;font-family:'Space Mono',monospace;font-size:0.8rem;line-height:1.7;color:rgba(255,255,255,0.85);white-space:pre;margin:0"><code>${escapeHtml(code)}</code></pre>
+  `;
+      body.appendChild(wrapper);
+    }
+
+    function renderImage(url) {
+      const body = document.getElementById('outputBody');
+      const div = document.createElement('div');
+      div.className = 'result-image';
+      if (url) {
+        div.innerHTML = `<img src="${url}" alt="AI Generated Image" onload="this.style.opacity=1" style="opacity:0;transition:opacity 0.5s">`;
+      } else {
+        div.innerHTML = `
+      <div class="placeholder-text">
+        🖼️ Image generation active<br><br>
+        <span style="color:rgba(255,255,255,0.2);font-size:0.7rem">Connect n8n + HuggingFace SDXL<br>to render actual images</span><br><br>
+        <code style="color:var(--acid);font-size:0.65rem">POST → /webhook/synthia-image</code>
+      </div>`;
+      }
+      body.appendChild(div);
+    }
+
+    function renderVideo(url) {
+      const body = document.getElementById('outputBody');
+      const div = document.createElement('div');
+      div.className = 'result-video';
+      if (url) {
+        div.innerHTML = `<video controls autoplay><source src="${url}" type="video/mp4">Your browser does not support video.</video>`;
+      } else {
+        div.innerHTML = `
+      <div style="padding:60px;text-align:center">
+        <div style="font-size:3rem;margin-bottom:16px">🎬</div>
+        <div style="color:rgba(255,255,255,0.5);font-size:0.85rem;line-height:1.8">
+          Video generation pipeline active<br>
+          <span style="color:rgba(255,255,255,0.25);font-size:0.7rem">ModelScope text-to-video via HuggingFace<br>n8n webhook ready to receive</span>
+        </div>
+        <div style="margin-top:20px;color:var(--acid);font-family:'Space Mono',monospace;font-size:0.65rem">
+          POST → /webhook/synthia-video<br>
+          Model: damo-vilab/text-to-video-ms-1.7b
+        </div>
+      </div>`;
+      }
+      body.appendChild(div);
+    }
+
+    function renderAudio(url) {
+      const body = document.getElementById('outputBody');
+      const div = document.createElement('div');
+      div.className = 'result-audio';
+
+      // Waveform visualization
+      let waveBars = '';
+      for (let i = 0; i < 40; i++) {
+        const h = Math.random() * 50 + 10;
+        waveBars += `<div class="wave-bar" style="--h:${h}px;animation-delay:${i * 0.05}s"></div>`;
+      }
+      div.innerHTML = `
+    <div class="waveform-placeholder"><div class="wave-bars">${waveBars}</div></div>
+    ${url ? `<audio controls src="${url}"></audio>` : `
+    <div style="text-align:center;padding:16px 0;color:rgba(255,255,255,0.4);font-size:0.8rem">
+      🎵 Audio synthesis active — Connect HuggingFace MusicGen<br>
+      <code style="color:var(--purple);font-size:0.65rem">POST → /webhook/synthia-audio</code>
+    </div>`}
+  `;
+      body.appendChild(div);
+    }
+
+    function renderMindmap(nodes) {
+      const body = document.getElementById('outputBody');
+      const container = document.createElement('div');
+      container.className = 'mindmap-svg-container';
+
+      const center = nodes.center || 'Main Topic';
+      const branches = nodes.branches || [];
+      const W = 800, H = 500;
+      const cx = W / 2, cy = H / 2;
+      const R = 160;
+
+      let svg = `<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg" style="width:100%;background:rgba(0,0,0,0.3);border-radius:12px">
+  <defs>
+    <radialGradient id="cg"><stop offset="0%" stop-color="#c8ff00" stop-opacity="0.2"/><stop offset="100%" stop-color="#c8ff00" stop-opacity="0"/></radialGradient>
+    <filter id="glow"><feGaussianBlur stdDeviation="3" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+  </defs>
+  <circle cx="${cx}" cy="${cy}" r="180" fill="url(#cg)" opacity="0.5"/>
+  <circle cx="${cx}" cy="${cy}" r="55" fill="rgba(200,255,0,0.1)" stroke="#c8ff00" stroke-width="1" filter="url(#glow)"/>
+  <text x="${cx}" y="${cy - 6}" text-anchor="middle" fill="#c8ff00" font-family="Bebas Neue" font-size="13" letter-spacing="1">${center.substring(0, 20)}</text>
+  <text x="${cx}" y="${cy + 12}" text-anchor="middle" fill="rgba(200,255,0,0.6)" font-family="Space Mono" font-size="8">${center.length > 20 ? center.substring(20, 35) + '...' : ''}</text>
+  `;
+
+      const colors = ['#ff2d78', '#7b2fff', '#00ffe1', '#ff9500', '#c8ff00', '#ff6b6b'];
+
+      branches.forEach((branch, i) => {
+        const angle = (2 * Math.PI * i / branches.length) - Math.PI / 2;
+        const bx = cx + R * Math.cos(angle);
+        const by = cy + R * Math.sin(angle);
+        const color = colors[i % colors.length];
+
+        svg += `<line x1="${cx}" y1="${cy}" x2="${bx}" y2="${by}" stroke="${color}" stroke-width="1.5" stroke-opacity="0.5" stroke-dasharray="4,2"/>`;
+        svg += `<circle cx="${bx}" cy="${by}" r="40" fill="rgba(0,0,0,0.6)" stroke="${color}" stroke-width="1"/>`;
+        svg += `<text x="${bx}" y="${by + 4}" text-anchor="middle" fill="${color}" font-family="Space Mono" font-size="8.5">${branch.label}</text>`;
+
+        (branch.children || []).forEach((child, j) => {
+          const childAngle = angle + (j - (branch.children.length - 1) / 2) * 0.4;
+          const cr = R + 80;
+          const childX = cx + cr * Math.cos(childAngle);
+          const childY = cy + cr * Math.sin(childAngle);
+          svg += `<line x1="${bx}" y1="${by}" x2="${childX}" y2="${childY}" stroke="${color}" stroke-width="1" stroke-opacity="0.3"/>`;
+          svg += `<circle cx="${childX}" cy="${childY}" r="24" fill="rgba(0,0,0,0.5)" stroke="${color}" stroke-width="0.5" stroke-opacity="0.5"/>`;
+          svg += `<text x="${childX}" y="${childY + 4}" text-anchor="middle" fill="rgba(255,255,255,0.7)" font-family="Space Mono" font-size="7">${child.substring(0, 12)}</text>`;
+        });
+      });
+
+      svg += `</svg>`;
+      container.innerHTML = svg;
+      body.appendChild(container);
+    }
+
+    function renderPresentation(slides) {
+      const body = document.getElementById('outputBody');
+      const container = document.createElement('div');
+      container.style.cssText = 'display:flex;flex-direction:column;gap:12px';
+
+      slides.forEach((slide, i) => {
+        const card = document.createElement('div');
+        card.style.cssText = `
+      background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);
+      border-radius:12px;padding:20px 24px;
+      border-left:3px solid ${['var(--acid)', 'var(--cyan)', 'var(--pink)', 'var(--purple)', 'var(--acid)', 'var(--cyan)'][i % 6]};
+    `;
+        card.innerHTML = `
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
+        <span style="font-size:0.6rem;color:rgba(255,255,255,0.3);letter-spacing:0.1em">SLIDE ${i + 1}</span>
+        <span style="font-size:0.6rem;color:rgba(255,255,255,0.2);text-transform:uppercase">${slide.type || 'content'}</span>
+      </div>
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:1.3rem;letter-spacing:0.05em;color:var(--white);margin-bottom:8px">${slide.title}</div>
+      <div style="font-family:'Inter',sans-serif;font-size:0.85rem;color:rgba(255,255,255,0.55);line-height:1.7;white-space:pre-line">${slide.content}</div>
+    `;
+        container.appendChild(card);
+      });
+
+      body.appendChild(container);
+    }
+
+    // ═══════════════════════════════════════════════════════════
+    //  LOADER
+    // ═══════════════════════════════════════════════════════════
+    let loaderInterval;
+    function showLoader(mode) {
+      const loader = document.getElementById('loader');
+      const loaderText = document.getElementById('loaderText');
+      const loaderStep = document.getElementById('loaderStep');
+      loader.classList.add('visible');
+
+      const steps = LOADER_STEPS[mode] || ['Processing...'];
+      let step = 0;
+      loaderText.textContent = 'GENERATING';
+      loaderStep.textContent = steps[0];
+
+      loaderInterval = setInterval(() => {
+        step = (step + 1) % steps.length;
+        loaderStep.textContent = steps[step];
+      }, 1500);
+    }
+
+    function hideLoader() {
+      clearInterval(loaderInterval);
+      document.getElementById('loader').classList.remove('visible');
+    }
+
+    function hideOutput() {
+      document.getElementById('outputCard').classList.remove('visible');
+    }
+
+    // ═══════════════════════════════════════════════════════════
+    //  ENHANCE PROMPT
+    // ═══════════════════════════════════════════════════════════
+    async function enhancePrompt() {
+      const ta = document.getElementById('mainPrompt');
+      const original = ta.value.trim();
+      if (!original) { toast('Enter a prompt to enhance'); return; }
+
+      toast('✦ Enhancing with AI...');
+
+      const enhancements = {
+        prefix: 'Ultra-detailed, cinematic, professional',
+        style: ', dramatic lighting, 8K quality, award-winning',
+        context: '. Include specific sensory details and emotional resonance.'
+      };
+
+      // Try n8n enhance endpoint, fallback to simple enhancement
+      try {
+        const res = await fetch(`${N8N_BASE_URL}/synthia-enhance`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ prompt: original }),
+          signal: AbortSignal.timeout(10000)
+        });
+        const data = await res.json();
+        ta.value = data.enhanced || original;
+      } catch {
+        // Local enhancement
+        const enhanced = `${enhancements.prefix}, ${original}${enhancements.style}${enhancements.context}`;
+        ta.value = enhanced;
+      }
+      updateCharCount();
+    }
+
+    // ═══════════════════════════════════════════════════════════
+    //  UTILITIES
+    // ═══════════════════════════════════════════════════════════
+    function updateCharCount() {
+      const len = document.getElementById('mainPrompt').value.length;
+      document.getElementById('charCount').textContent = len;
+    }
+
+    function handleKeydown(e) {
+      if (e.ctrlKey && e.key === 'Enter') generate();
+    }
+
+    function toast(msg, duration = 3000) {
+      const t = document.getElementById('toast');
+      t.textContent = msg; t.classList.add('show');
+      setTimeout(() => t.classList.remove('show'), duration);
+    }
+
+    function copyOutput() {
+      if (!currentOutput) return;
+
+      if (currentOutput.mode === "image") {
+        const img = document.querySelector('#outputBody img');
+        if (!img) return;
+
+        fetch(img.src)
+          .then(res => res.blob())
+          .then(blob => {
+            const item = new ClipboardItem({ [blob.type]: blob });
+            navigator.clipboard.write([item]);
+            toast('✓ Image copied');
+          });
+      } else {
+        const text = document.getElementById('outputBody').innerText;
+        navigator.clipboard.writeText(text).then(() => toast('✓ Copied to clipboard'));
+      }
+    }
+    function downloadOutput() {
+      if (!currentOutput) return;
+
+      if (currentOutput.mode === "image") {
+        const img = document.querySelector('#outputBody img');
+        if (!img) return;
+
+        const a = document.createElement('a');
+        a.href = img.src;
+        a.download = `synthia-image-${Date.now()}.png`;
+        a.click();
+
+        toast('✓ Image downloaded');
+      } else {
+        const text = document.getElementById('outputBody').innerText;
+        const ext = { short: 'txt', long: 'md', code: 'js', mindmap: 'svg', presentation: 'md' }[currentOutput.mode] || 'txt';
+
+        const blob = new Blob([text], { type: 'text/plain' });
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = `synthia-${currentOutput.mode}-${Date.now()}.${ext}`;
+        a.click();
+
+        toast('✓ Downloaded');
+      }
+    }
+
+    function shareOutput() {
+      if (!currentOutput) return;
+      const text = `Generated with SYNTHIA AI: "${currentOutput.prompt.substring(0, 50)}..."`;
+      if (navigator.share) {
+        navigator.share({ title: 'SYNTHIA AI Output', text }).catch(() => { });
+      } else {
+        navigator.clipboard.writeText(`${text}\n\nOutput:\n${document.getElementById('outputBody').innerText}`);
+        toast('✓ Copied for sharing');
+      }
+    }
+
+    function clearOutput() {
+      document.getElementById('outputCard').classList.remove('visible');
+      currentOutput = null;
+    }
+
+    function escapeHtml(str) {
+      return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    }
+
+    function getModelName(mode) {
+      const models = {
+        video: 'ModelScope T2V', audio: 'MusicGen', image: 'SDXL-Turbo',
+        mindmap: 'GPT-structured', short: 'Mistral-7B', long: 'Llama-3-8B',
+        code: 'CodeLlama-34B', presentation: 'Mixtral-8x7B'
+      };
+      return models[mode] || 'HuggingFace';
+    }
+
+    function randomPrompt() {
+      const prompts = [
+        'A cyberpunk street market in Tokyo at 2 AM, rain reflecting neon lights, people in hover pods',
+        'Deep ocean bioluminescent creatures in a coral reef city, photorealistic macro photography',
+        'Ancient Egyptian pharaoh using a holographic computer interface, digital art, 8K',
+        'Minimalist meditation app UI with flowing water animations and zen garden elements',
+        'The birth of a star in a distant galaxy, NASA photorealistic space photography style',
+        'A cozy coffee shop in a floating cloud city, soft morning light, illustrated storybook style',
+        'Write a startup pitch for an AI that predicts emotions from voice tone',
+        'Explain quantum entanglement using a romantic relationship as an analogy',
+        'Design a workout plan for astronauts training for a Mars mission',
+      ];
+      document.getElementById('mainPrompt').value = prompts[Math.floor(Math.random() * prompts.length)];
+      updateCharCount();
+      toast('🎲 Random prompt loaded');
+    }
+
+    function saveToHistory(mode, prompt, result) {
+      history.unshift({ mode, prompt, result, timestamp: new Date().toISOString() });
+      if (history.length > 50) history.pop();
+      localStorage.setItem('synthia_history', JSON.stringify(history));
+    }
+
+    function toggleHistory() {
+      toast(`📚 ${history.length} items in history`);
+    }
+
+    // Init
+    updateCharCount();
+  </script>
+</body>
+
+</html>
